@@ -432,5 +432,5 @@ See more examples on [our Rubika channel](https://rubika.ir/PyRubikaBotAPI).
 ## Author
 
 Alireza Sadeghian  
-Email: alireza@example.com
+Email: alireza.amid110@gmail.com
 
