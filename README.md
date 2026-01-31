@@ -379,3 +379,58 @@ bot.process_new_updates([update])
 ---
 
 ## Examples
+```py
+from rubibot import RubiBot, types
+
+bot = RubiBot('YOUR_BOT_TOKEN')
+
+
+@bot.message_handler(commands=['start', 'help'])
+def handle(message: types.Message):
+    if message.text == '/start':
+
+        btn = types.KeypadSimpleButton('hello', 'hello')
+        row = types.KeypadRow()
+        row.add(btn)
+        keypad = types.ChatKeypad(resize_keyboard=True)
+        keypad.add(row)
+
+        bot.send_message(message.chat_id, 'hello, i am PyRubikaBotAPI', chat_keypad=keypad)
+
+    if message.text == '/help':
+        bot.send_message(message.chat_id, 'This is a Bot!')
+
+@bot.message_handler()
+def all_handler(message: types.Message):
+    if message.aux.button_id == 'hello':
+        keypad = types.ChatKeypadRemove()
+        bot.reply_to(message, 'hello', chat_keypad=keypad)
+    else:
+        bot.reply_to(message, f'you said: {message.text}')
+
+
+@bot.message_handler(content_types=['file'])
+def file_handler(message: types.Message):
+    file_id = message.file.id
+    file_url = bot.get_file(file_id)
+    file = bot.download_file(file_url)
+    with open('photo.png', 'wb') as f:
+        f.write(file)
+    # --------------------------
+    with open('photo.png', 'rb') as f:
+        bot.send_photo(message.chat_id, f, message.text)
+
+if __name__ == '__main__':
+    bot.set_commands(
+        types.BotCommand('start', 'to start bot'),
+        types.BotCommand('help', 'show help')
+    )
+    bot.polling()
+```
+See more examples on [our Rubika channel](https://rubika.ir/PyRubikaBotAPI).
+
+## Author
+
+Alireza Sadeghian  
+Email: alireza@example.com
+
