@@ -234,3 +234,148 @@ bot.process_new_updates([update])
 - If you use polling, you do **not** need to use this method.  
 - The input must always be a list of `Update` objects.  
 - Each update is processed in the order received, and only the first matching handler for a message will be executed.
+
+## Models
+
+PyRubikaBotAPI uses several classes to represent messages, commands, polls, and keypads. Understanding these models will help you build more advanced bots.
+
+---
+
+### 1. `Message`
+Represents a message received from a user. Each message object contains all relevant information including text, sender, attachments, location, polls, and replies.
+
+**Attributes:**
+- `type` – type of message (`text`, `file`, `sticker`, etc.)
+- `chat_id` – the chat the message was sent in
+- `message_id` – unique message ID
+- `text` – text content
+- `time` – timestamp
+- `is_edited` – if the message was edited
+- `sender_type` – type of sender (`user` or `bot`)
+- `sender_id` – ID of the sender
+- `reply_to_message_id` – ID of the message being replied to
+- `forwarded_from` – info about the original sender if forwarded
+- `file`, `location`, `sticker`, `contact`, `poll` – corresponding objects if present
+
+**Example:**
+```python
+@bot.message_handler()
+def echo(message: Message):
+    print(message.text, message.sender_id)
+    bot.reply_to(message, "You said: " + message.text)
+```
+
+---
+
+### 2. `BotCommand`
+Represents a command in the bot interface.
+
+**Attributes:**
+- `command` – the command text, e.g., `/start`
+- `description` – description shown to users
+
+**Example:**
+```python
+bot.set_commands(
+    BotCommand("/start", "Start the bot"),
+    BotCommand("/help", "Show help")
+)
+```
+
+---
+
+### 3. `ChatPoll`
+Represents a poll to send to a chat.
+
+**Attributes:**
+- `question` – poll question
+- `options` – list of options (max 10)
+
+**Methods:**
+- `add_options(*args)` – add options to the poll
+
+**Example:**
+```python
+poll = ChatPoll("Favorite color?")
+poll.add_options("Red", "Blue", "Green")
+bot.send_poll(chat_id="123456", poll=poll)
+```
+
+---
+
+### 4. Keypads & Buttons
+
+#### `ChatKeypad`
+A keypad displayed at the bottom of the chat.
+
+- `add(*keypad_rows)` – add rows of buttons
+
+#### `ChatKeypadRemove`
+Removes the chat keypad.
+
+#### `InlineKeypad`
+Inline buttons under a message.
+
+- `add(*keypad_rows)` – add rows of buttons
+
+#### `KeypadRow`
+Represents a row of buttons.
+
+- `add(*buttons)` – add buttons to the row
+
+#### `KeypadSimpleButton`
+A simple button with text and an ID.
+
+**Example of using Keypads with a message:**
+```python
+# Create inline button
+btn1 = KeypadSimpleButton("Option 1", "id1")
+btn2 = KeypadSimpleButton("Option 2", "id2")
+
+# Create a row
+row = KeypadRow()
+row.add(btn1, btn2)
+
+# Create inline keypad and add row
+inline_keypad = InlineKeypad()
+inline_keypad.add(row)
+
+# Send message with inline keypad
+bot.send_message(
+    chat_id="123456",
+    text="Choose an option:",
+    inline_keypad=inline_keypad
+)
+
+# Create chat keypad
+row2 = KeypadRow()
+row2.add(KeypadSimpleButton("Yes", "yes"), KeypadSimpleButton("No", "no"))
+
+chat_keypad = ChatKeypad()
+chat_keypad.add(row2)
+
+bot.send_message(
+    chat_id="chat_id",
+    text="Do you agree?",
+    chat_keypad=chat_keypad
+)
+```
+
+---
+
+### 5. `Update`
+Represents an update received from Rubika (webhook or polling).
+
+**Usage:**
+- Convert JSON update to `Update` object
+- Pass a list of updates to `process_new_updates`
+
+**Example:**
+```python
+update = Update(myupdate_json)
+bot.process_new_updates([update])
+```
+
+---
+
+## Examples
