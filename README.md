@@ -15,11 +15,11 @@ python -m pip install --upgrade pip
 ## Get Started
 To get started, go to @BotFother on Rubika, create a new bot, and obtain a token.
 ```python
-from Rubibot import Rubibot
+import rubibot
 ```
 Now, paste the received token in this field."
 ```python
-bot = RubiBot('your_token')
+bot = rubibot.RubiBot('your_token')
 ```
 Defining a simple handler
 ```python
@@ -68,8 +68,8 @@ Send a text message to a specific chat. You can also attach a chat keypad, inlin
 **Example:**
 ```python
 bot.send_message(
-    chat_id="123456",
-    text="Hello, this is a test message!"
+    chat_id="chat_id",
+    text="Hello World"
 )
 ```
 
@@ -97,8 +97,9 @@ Send a poll to a specific chat.
 
 **Example:**
 ```python
-poll = ChatPoll("Favorite color?", ["Red", "Blue", "Green"])
-bot.send_poll(chat_id="123456", poll=poll)
+poll = rubibot.types.ChatPoll("Favorite color?")
+poll.add("Red", "Blue", "Green")
+bot.send_poll(chat_id="chat_id", poll=poll)
 ```
 
 ### 6. `send_contact`
@@ -119,7 +120,7 @@ Retrieve information about a chat, such as its type, title, and username.
 
 **Example:**
 ```python
-chat_info = bot.get_chat("123456")
+chat_info = bot.get_chat("chat_id")
 print(chat_info.title, chat_info.username)
 ```
 
@@ -128,7 +129,7 @@ Forward a message from one chat to another.
 
 **Example:**
 ```python
-bot.forward(from_chat_id="123", to_chat_id="456", message_id="789")
+bot.forward(from_chat_id="chat_id", to_chat_id="chat_id_2", message_id="1234567890")
 ```
 
 ### 9. `edit_message`
@@ -136,7 +137,7 @@ Edit the text or inline buttons of a sent message.
 
 **Example:**
 ```python
-bot.edit_message(chat_id="123", message_id="456", new_text="Updated text")
+bot.edit_message(chat_id="chat_id", message_id="123456789", new_text="Updated text")
 ```
 
 ### 10. `delete_message`
@@ -144,7 +145,7 @@ Delete a specific message.
 
 **Example:**
 ```python
-bot.delete_message(chat_id="123", message_id="456")
+bot.delete_message(chat_id="chat_id", message_id="1234567890")
 ```
 
 ### 11. `set_commands`
@@ -153,8 +154,8 @@ Set commands that appear for new users in the bot interface.
 **Example:**
 ```python
 bot.set_commands(
-    BotCommand("/start", "Start the bot"),
-    BotCommand("/help", "Show help")
+    rubibot.types.BotCommand("/start", "Start the bot"),
+    rubibot.types.BotCommand("/help", "Show help")
 )
 ```
 
@@ -163,7 +164,7 @@ Update or remove the chat keypad for a specific chat.
 
 **Example:**
 ```python
-bot.edit_chat_keypad(chat_id="123", chat_keypad=my_keypad)
+bot.edit_chat_keypad(chat_id="chat_id", chat_keypad=keypad) # keypad type: rubibot.types.ChatKeypad
 ```
 
 ### 13. `set_webhook`
@@ -171,7 +172,7 @@ Set a webhook to receive updates from Rubika.
 
 **Example:**
 ```python
-bot.set_webhook("https://myserver.com/webhook")
+bot.set_webhook("https://example.com/webhook")
 ```
 
 ### 14. `get_file` & `download_file`
@@ -185,4 +186,51 @@ with open("file.png", "wb") as f:
     f.write(file_data)
 ```
 
-💡 **Tip:** PyRubikaBotAPI allows you to build bots ranging from **simple echo bots** to **full-featured interactive bots** with polls, contacts, keyboards, and more.
+### 15. Sending Media & Files
+
+PyRubikaBotAPI provides multiple methods to send different types of media to chats. All these methods work similarly, and you can attach text, chat keypads, inline keypads, reply to a specific message, or disable notifications.
+
+Supported media sending methods:
+
+- `send_photo` – Send an image (max 10 MB, PNG/JPG/GIF/WEBP).
+- `send_voice` – Send a voice message (MP3).
+- `send_video` – Send a video (max 50 MB, MP4).
+- `send_gif` – Send a GIF without sound (MP4).
+- `send_file` – Send any other file (max 50 MB, all formats).
+
+**Usage Example (sending a photo):**
+```python
+bot.send_photo(
+    chat_id="chat_id",
+    photo="image.png",   # can be bytes or a file path
+    text="Here is an image!",
+    chat_keypad=your_keypad,      # optional
+    inline_keypad=your_inline,    # optional
+    reply_to_message_id="1234567890",  # optional
+    disable_notification=False  # optional
+)
+```
+
+⚡ **Tip:** All other methods (`send_voice`, `send_video`, `send_gif`, `send_file`) work exactly the same as `send_photo`. Just replace the media type and file input accordingly.
+
+---
+
+### 16. `process_new_updates`
+
+This method is used to process new updates, usually when using webhooks. It passes each update through the message handlers you registered.
+
+**Usage Instructions:**
+1. Convert the received JSON update into a `rubibot.types.Update` object.
+2. Pass it as a list to `process_new_updates`.
+
+**Example:**
+```python
+update = rubibot.types.Update(myupdate)  # Updates received from Webhook
+bot.process_new_updates([update])
+# The received update is now processed by your registered handlers
+```
+
+⚠️ **Important:** 
+- If you use polling, you do **not** need to use this method.  
+- The input must always be a list of `Update` objects.  
+- Each update is processed in the order received, and only the first matching handler for a message will be executed.
